@@ -1,0 +1,7 @@
+{"ADMIN": "administration",
+    "ERROR": "error",
+    "LOGIN": "login",
+    "ACK": "acknowledge",
+    "CHAT": "chat",
+    "APP": "application",
+    "WHOIS": "whois"}

@@ -1,0 +1,9 @@
+INFO - Message_Handler: Got admin user login message
+INFO - Message_Handler: Logging in trevor
+INFO - Message_Handler: trevor is logged in as administrator
+INFO - Message_Handler: Got admin user login message
+INFO - Message_Handler: Logging in trevor
+INFO - Message_Handler: trevor is logged in as administrator
+INFO - Message_Handler: Starting scan for new modules
+INFO - Message_Handler: Current modules: blackjack
+INFO - Message_Handler: Started module blackjack as separate process

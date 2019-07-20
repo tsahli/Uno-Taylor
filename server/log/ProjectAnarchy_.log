@@ -1,0 +1,5 @@
+INFO - ProjectAnarchy: Starting game between trev and trev1
+INFO - ProjectAnarchy: Sending message to trev - {"module":"ProjectAnarchy","action":"start"}
+INFO - ProjectAnarchy: Sending message to trev1 - {"module":"ProjectAnarchy","x":1,"action":"move","y":0}
+INFO - ProjectAnarchy: Sending message to trev - {"hit":true,"module":"ProjectAnarchy","action":"hit"}
+INFO - ProjectAnarchy: Ending game between trev and trev1
