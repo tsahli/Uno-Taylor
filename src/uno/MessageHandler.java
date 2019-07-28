@@ -4,7 +4,9 @@ import modules.Handler;
 import org.json.JSONObject;
 
 public class MessageHandler extends Handler {
-    private static final String MODULE = "JavaUno";
+    private static final String MODULE = "Uno";
+
+    private String username;
 
     public MessageHandler() {
         this(null);
@@ -18,11 +20,37 @@ public class MessageHandler extends Handler {
         if (null == message.optString("module") || !MODULE.equals(message.getString("module"))) {
             return;
         }
+        if (null == username) {
+            username = message.getString("username");
+        }
 
-        System.out.println(message);
+        if (!message.has("action")) {
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("type", "error");
+            errorMessage.put("message", "Skip-Bo messages require an 'action' value");
+
+            netSend(errorMessage, username, MODULE);
+            return;
+        }
+
+        switch (message.getString("action")) {
+            case "login":
+                JSONObject ackMessage = new JSONObject();
+                ackMessage.put("action", Game.joinGame(this) ? "ack" : "deny");
+
+                netSend(ackMessage, username, MODULE);
+
+                break;
+            default:
+                System.out.println(message);
+        }
     }
 
     public static void main(String[] args) {
         new Thread(new MessageHandler()).start();
+    }
+
+    public String getUsername() {
+        return username;
     }
 }
