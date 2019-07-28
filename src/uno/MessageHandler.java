@@ -41,6 +41,16 @@ public class MessageHandler extends Handler {
                 netSend(ackMessage, username, MODULE);
 
                 break;
+            case "draw card":
+                Card card = Game.drawCard(username);
+
+                JSONObject cardMessage = new JSONObject();
+                cardMessage.put("action", "draw card");
+                cardMessage.put("card", card.toJson());
+
+                netSend(cardMessage, username, MODULE);
+
+                break;
             default:
                 System.out.println(message);
         }
