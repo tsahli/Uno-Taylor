@@ -1,7 +1,7 @@
 Uno
-========
+======
 
-This is the server module for CS 3230 Group 1
+This is the server module for CS 3230
 
 ### Running the module
 
@@ -61,7 +61,54 @@ using _**TODO**_
 
 ### The following message types may be sent from the server:
 
-* _APP_
+* _APP_ (The format of this message is dependant on the API defined by the group)
+
+```json
+
+```
+
 * _WHOIS_
+
+```json
+{
+  "type": "whois",
+  "message":
+    {
+      "users":
+        [
+          {
+            "username": "<user name>",
+            "modules":
+              [
+                "<module name>"
+              ]
+          }
+        ],
+      "modules": 
+        [
+          {
+            "moduleName": "<module name>",
+            "started": <boolean>
+          }
+        ]
+    }
+}
+```
+
 * _ACK_
+
+```json
+{
+  "type": "acknowledge",
+  "message": "<message from server>"
+}
+```
+
 * _ERROR_
+
+```json
+{
+  "type": "error",
+  "message": "<error message from server>"
+}
+```
