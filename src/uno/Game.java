@@ -1,5 +1,8 @@
 package uno;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.Deque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -24,6 +27,7 @@ public class Game {
 
     private Deque<Card> deck = new ConcurrentLinkedDeque<>();
     private Queue<Player> players = new ConcurrentLinkedQueue<>();
+    private Deque<Card> discard = new ConcurrentLinkedDeque<>();
 
     private Game() {
         final String[] SPECIAL_TYPES = { "Skip", "Draw Two", "Reverse" };
@@ -55,19 +59,60 @@ public class Game {
         }
     }
 
+    public static void playCard(Card card, String username) {
+        if (null == game) {
+            throw new IllegalStateException("No game is currently in progress");
+        }
+
+        Player player = game.players.stream()
+                .filter(p -> p.getUsername().equals(username))
+                .findAny()
+                .orElse(null);
+        if (null == player) {
+            throw new IllegalArgumentException("No player with username " + username + " is playing");
+        }
+
+        game.discard.add(player.playCard(card));
+
+        game.broadcastTable();
+    }
+
+    private void broadcastTable() {
+        JSONObject message = new JSONObject();
+
+        JSONArray playerArray = new JSONArray();
+        players.forEach(p -> playerArray.put(p.toJson()));
+
+        message.put("top card", discard.peekFirst());
+        message.put("players", playerArray);
+
+        players.forEach(p -> p.sendToUser(message));
+    }
+
     private void addPlayer(MessageHandler player) {
         players.add(new Player(player));
     }
 
-    public static Card drawCard(String username) {
+    public static void drawCard(String username) {
         if (null == game) {
             game = new Game();
         }
 
-        if (game.players.stream().noneMatch(p -> p.getUsername().equals(username))) {
+        Player player = game.players.stream()
+                .filter(p -> p.getUsername().equals(username))
+                .findAny()
+                .orElse(null);
+        if (null == player) {
             throw new IllegalStateException("Username " + username + " is not joined");
         }
 
-        return game.deck.pop();
+        if (game.deck.size() <= 0) {
+            throw new IllegalStateException("Deck is empty");
+        }
+
+        Card card = game.deck.pop();
+        player.drawCard(card);
+
+        game.broadcastTable();
     }
 }

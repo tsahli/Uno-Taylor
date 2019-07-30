@@ -33,26 +33,35 @@ public class MessageHandler extends Handler {
             return;
         }
 
-        switch (message.getString("action")) {
-            case "login":
-                JSONObject ackMessage = new JSONObject();
-                ackMessage.put("action", Game.joinGame(this) ? "ack" : "deny");
+        try {
+            switch (message.getString("action")) {
+                case "login":
+                    JSONObject ackMessage = new JSONObject();
+                    ackMessage.put("action", Game.joinGame(this) ? "ack" : "deny");
 
-                netSend(ackMessage, username, MODULE);
+                    netSend(ackMessage, username, MODULE);
 
-                break;
-            case "draw card":
-                Card card = Game.drawCard(username);
+                    break;
+                case "draw card":
+                    Game.drawCard(username);
 
-                JSONObject cardMessage = new JSONObject();
-                cardMessage.put("action", "draw card");
-                cardMessage.put("card", card.toJson());
+                    break;
+                case "send":
+                    if (!message.has("card")) {
+                        throw new IllegalArgumentException("Must have a card to send");
+                    }
 
-                netSend(cardMessage, username, MODULE);
+                    Game.playCard(new Card(message.getJSONObject("card")), username);
+                    break;
+                default:
+                    System.out.println(message);
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("type", "error");
+            errorMessage.put("message", e.getMessage());
 
-                break;
-            default:
-                System.out.println(message);
+            sendToUser(errorMessage);
         }
     }
 
@@ -62,5 +71,9 @@ public class MessageHandler extends Handler {
 
     public String getUsername() {
         return username;
+    }
+
+    public void sendToUser(JSONObject message) {
+        netSend(message, username, MODULE);
     }
 }
