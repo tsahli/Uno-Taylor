@@ -7,15 +7,15 @@ public class Card {
         Red, Yellow, Green, Blue
     }
 
-    private int value;
+    private String value;
     private Color color;
 
-    public Card(int value, Color color) {
+    public Card(String value, Color color) {
         this.value = value;
         this.color = color;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 

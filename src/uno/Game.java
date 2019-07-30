@@ -26,11 +26,32 @@ public class Game {
     private Queue<Player> players = new ConcurrentLinkedQueue<>();
 
     private Game() {
-        for (int i = 0; i <= 9; i++) {
-            deck.add(new Card(i, Card.Color.Blue));
-            deck.add(new Card(i, Card.Color.Green));
-            deck.add(new Card(i, Card.Color.Red));
-            deck.add(new Card(i, Card.Color.Yellow));
+        final String[] SPECIAL_TYPES = { "Skip", "Draw Two", "Reverse" };
+
+        deck.add(new Card("0", Card.Color.Blue));
+        deck.add(new Card("0", Card.Color.Green));
+        deck.add(new Card("0", Card.Color.Red));
+        deck.add(new Card("0", Card.Color.Yellow));
+
+        for (int i = 0; i < 2; i++) {
+            for (int j = 1; j <= 9; j++) {
+                deck.add(new Card(j + "", Card.Color.Blue));
+                deck.add(new Card(j + "", Card.Color.Green));
+                deck.add(new Card(j + "", Card.Color.Red));
+                deck.add(new Card(j + "", Card.Color.Yellow));
+            }
+
+            for (String s: SPECIAL_TYPES) {
+                deck.add(new Card(s, Card.Color.Blue));
+                deck.add(new Card(s, Card.Color.Green));
+                deck.add(new Card(s, Card.Color.Red));
+                deck.add(new Card(s, Card.Color.Yellow));
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            deck.add(new Card("Wild", null));
+            deck.add(new Card("Wild Draw Four", null));
         }
     }
 
