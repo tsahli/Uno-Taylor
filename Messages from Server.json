@@ -1,0 +1,31 @@
+{ "playedCard": {
+   "color": "color",
+   "value": "1",
+   "username": "username"
+ },
+ 
+ "drawnCard": {
+   "color": "color",
+   "value": "1",
+   "username": "username"
+ },
+ 
+ 
+ "initialHand":
+   [{"color": "color", "value": "value"}, 
+    {"color": "color", "value": "value"},
+    {"color": "color", "value": "value"},
+    {"color": "color", "value": "value"}, 
+    {"color": "color", "value": "value"}, 
+    {"color": "color", "value": "value"}, 
+    {"color": "color", "value": "value"}],
+ 
+ "winnerMode": true,
+ 
+ "turnMessage": "turn",
+ 
+ "quit": "quit",
+ 
+ "win": { "winMessage": "win", "username": "username" }
+ 
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "type": "application",
+    "message": {
+      "module": "UNO",
+      "action": "drawcard"
+    }
+  },
+  {
+    "type": "application",
+    "message": {
+      "module": "uno",
+      "action": "send",
+        "card": {
+          "Color": "c",
+          "Value": "v)"
+        }
+    }
+  },
+  {
+    "type": "application",
+    "message": {
+      "module": "uno",
+      "action": "play"
+    }
+  },
+  {
+    "type": "application",
+    "message": {
+      "module": "uno",
+      "action": "unocall"
+    }
+  },
+  {
+    "type": "application",
+    "message": {
+      "module": "uno",
+      "action": "quit"
+    }
+  },
+  {
+    "type": "login",
+    "message": {
+      "username": "Justin"
+    }
+  }
+]
