@@ -12,8 +12,7 @@
       "module": "uno",
       "action": "send",
         "card": {
-          "Color": "c",
-          "Value": "v)"
+          "color": "c", "value": "v)"
         }
     }
   },

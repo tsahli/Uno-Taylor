@@ -35,14 +35,14 @@ public class MessageHandler extends Handler {
 
         try {
             switch (message.getString("action")) {
-                case "login":
+                case "join":
                     JSONObject ackMessage = new JSONObject();
                     ackMessage.put("action", Game.joinGame(this) ? "ack" : "deny");
 
                     netSend(ackMessage, username, MODULE);
 
                     break;
-                case "draw card":
+                case "drawcard":
                     Game.drawCard(username);
 
                     break;

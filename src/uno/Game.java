@@ -1,6 +1,5 @@
 package uno;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Deque;
@@ -74,19 +73,10 @@ public class Game {
 
         game.discard.add(player.playCard(card));
 
-        game.broadcastTable();
-    }
+        JSONObject cardMessage = new JSONObject();
+        cardMessage.put("playedCard", card.toJson());
 
-    private void broadcastTable() {
-        JSONObject message = new JSONObject();
-
-        JSONArray playerArray = new JSONArray();
-        players.forEach(p -> playerArray.put(p.toJson()));
-
-        message.put("top card", discard.peekFirst());
-        message.put("players", playerArray);
-
-        players.forEach(p -> p.sendToUser(message));
+        game.players.forEach(p -> p.sendToUser(cardMessage));
     }
 
     private void addPlayer(MessageHandler player) {
@@ -113,6 +103,9 @@ public class Game {
         Card card = game.deck.pop();
         player.drawCard(card);
 
-        game.broadcastTable();
+        JSONObject cardMessage = new JSONObject();
+        cardMessage.put("drawnCard", card.toJson());
+
+        player.sendToUser(cardMessage);
     }
 }

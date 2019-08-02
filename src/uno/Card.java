@@ -22,7 +22,7 @@ public class Card {
             throw new IllegalArgumentException("Card must have a value");
         }
 
-        value = card.getString("value");
+        value = card.optString("value");
 
         if (!card.has("color")) {
             if (!"Wild".equals(value) && !"Wild Draw Four".equals(value)) {
