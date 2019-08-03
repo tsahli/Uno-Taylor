@@ -14,6 +14,10 @@ public class Game {
             game = new Game();
         }
 
+        if (null != game.currentTurn) {
+            throw new IllegalStateException("Can't join a game in progress");
+        }
+
         boolean joined = false;
         if (game.players.stream().noneMatch(p -> p.getUsername().equals(username))) {
             game.addPlayer(username);
@@ -26,7 +30,7 @@ public class Game {
     private Deque<Card> deck;
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private Deque<Card> discard = new ConcurrentLinkedDeque<>();
-    private static String currentTurn;
+    private String currentTurn;
 
     private Game() {
     }
@@ -43,7 +47,7 @@ public class Game {
         if (null == player) {
             throw new IllegalArgumentException("No player with username " + username + " is playing");
         }
-        if (!Objects.equals(currentTurn, player.getUsername())) {
+        if (!Objects.equals(game.currentTurn, player.getUsername())) {
             throw new IllegalArgumentException("It is not player " + username + "'s turn");
         }
 
@@ -119,7 +123,7 @@ public class Game {
         game.deck.addAll(deck);
 
         MessageHandler handler = MessageHandler.getInstance();
-        currentTurn = null;
+        game.currentTurn = null;
         game.players.forEach(player -> {
             while (player.handSize() < 7) {
                 player.drawCard(game.deck.pop());
@@ -128,15 +132,15 @@ public class Game {
             JSONObject message = new JSONObject();
             message.put("initialHand", player.cardArray());
 
-            if (currentTurn == null) {
-                currentTurn = player.getUsername();
+            if (game.currentTurn == null) {
+                game.currentTurn = player.getUsername();
             }
             handler.sendToUser(message, player.getUsername());
         });
 
         JSONObject turnMessage = new JSONObject();
         turnMessage.put("turnMessage", "turn");
-        handler.sendToUser(turnMessage, currentTurn);
+        handler.sendToUser(turnMessage, game.currentTurn);
     }
 
     private void addPlayer(String player) {
@@ -159,7 +163,7 @@ public class Game {
         if (null == player) {
             throw new IllegalStateException("Username " + username + " is not joined");
         }
-        if (!Objects.equals(currentTurn, player.getUsername())) {
+        if (!Objects.equals(game.currentTurn, player.getUsername())) {
             throw new IllegalArgumentException("It is not " + username + "'s turn");
         }
 
