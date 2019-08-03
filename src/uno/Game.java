@@ -200,10 +200,12 @@ public class Game {
 
         if (playerQuit) {
             JSONObject message = new JSONObject();
-            message.put("action", "quit");
-            message.put("username", username);
+            message.put("quit", username);
 
             broadcast(message);
+
+            message.put("quit", "quit");
+            MessageHandler.getInstance().sendToUser(message, username);
         }
         else {
             throw new IllegalArgumentException("User " + username + " isn't in the game");
