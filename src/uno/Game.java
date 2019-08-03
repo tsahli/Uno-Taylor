@@ -54,7 +54,22 @@ public class Game {
 
         broadcast(cardMessage);
 
-        game.nextTurn();
+        synchronized (game.players) {
+            if (game.players.stream().anyMatch(p -> 0 == p.handSize())) {
+                JSONObject winMessage = new JSONObject();
+                JSONObject winState = new JSONObject();
+                winState.put("winMessage", "win");
+                winState.put("username", game.players.stream().filter(p -> 0 == p.handSize()).findFirst().get().getUsername());
+                winMessage.put("win", winState);
+
+                broadcast(winMessage);
+
+                game = null;
+            }
+            else{
+                game.nextTurn();
+            }
+        }
     }
 
     private static void broadcast(JSONObject cardMessage) {
