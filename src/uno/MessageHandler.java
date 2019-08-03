@@ -50,7 +50,7 @@ public class MessageHandler extends Handler {
 
                     break;
                 case "drawcard":
-                    Game.drawCard(username);
+                    Game.drawCard(username, true);
 
                     break;
                 case "send":

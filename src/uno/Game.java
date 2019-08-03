@@ -54,29 +54,7 @@ public class Game {
 
         broadcast(cardMessage);
 
-        synchronized (game.players) {
-            Player nextTurn = game.players.stream().reduce(null, (turn, player2) -> {
-                if (null != turn && Objects.equals(currentTurn, turn.getUsername())) {
-                    return player2;
-                }
-                if (Objects.equals(currentTurn, player2.getUsername())) {
-                    return player2;
-                }
-
-                return null;
-            });
-
-            if (null == nextTurn || Objects.equals(nextTurn.getUsername(), currentTurn)) {
-                currentTurn = Objects.requireNonNull(game.players.peek()).getUsername();
-            }
-            else {
-                currentTurn = nextTurn.getUsername();
-            }
-        }
-
-        JSONObject turnMessage = new JSONObject();
-        turnMessage.put("turnMessage", "turn");
-        MessageHandler.getInstance().sendToUser(turnMessage, currentTurn);
+        game.nextTurn();
     }
 
     private static void broadcast(JSONObject cardMessage) {
@@ -150,7 +128,7 @@ public class Game {
         players.add(new Player(player));
     }
 
-    public static void drawCard(String username) {
+    public static void drawCard(String username, boolean updateTurn) {
         if (null == game) {
             game = new Game();
         }
@@ -165,6 +143,9 @@ public class Game {
 
         if (null == player) {
             throw new IllegalStateException("Username " + username + " is not joined");
+        }
+        if (!Objects.equals(currentTurn, player.getUsername())) {
+            throw new IllegalArgumentException("It is not " + username + "'s turn");
         }
 
         if (null == game.deck) {
@@ -181,6 +162,36 @@ public class Game {
         cardMessage.put("drawnCard", card.toJson());
 
         MessageHandler.getInstance().sendToUser(cardMessage, player.getUsername());
+
+        if (updateTurn) {
+            game.nextTurn();
+        }
+    }
+
+    private void nextTurn() {
+        synchronized (players) {
+            Player nextTurn = players.stream().reduce(null, (turn, player2) -> {
+                if (null != turn && Objects.equals(currentTurn, turn.getUsername())) {
+                    return player2;
+                }
+                if (Objects.equals(currentTurn, player2.getUsername())) {
+                    return player2;
+                }
+
+                return null;
+            });
+
+            if (null == nextTurn || Objects.equals(nextTurn.getUsername(), currentTurn)) {
+                currentTurn = Objects.requireNonNull(players.peek()).getUsername();
+            }
+            else {
+                currentTurn = nextTurn.getUsername();
+            }
+        }
+
+        JSONObject turnMessage = new JSONObject();
+        turnMessage.put("turnMessage", "turn");
+        MessageHandler.getInstance().sendToUser(turnMessage, currentTurn);
     }
 
     public static synchronized void quit(String username) {
