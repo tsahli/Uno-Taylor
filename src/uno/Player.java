@@ -1,10 +1,12 @@
 package uno;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 public class Player {
     private final String username;
@@ -51,5 +53,16 @@ public class Player {
 
     public void drawCard(Card card) {
         hand.add(card);
+    }
+
+    public int handSize() {
+        return hand.size();
+    }
+
+    public JSONArray cardArray() {
+        JSONArray array = new JSONArray();
+        hand.forEach(card -> array.put(card.toJson()));
+
+        return new JSONArray(hand.stream().map(Card::toJson).collect(Collectors.toList()));
     }
 }

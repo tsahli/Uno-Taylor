@@ -46,7 +46,8 @@ public class MessageHandler extends Handler {
 
                     break;
                 case "play":
-                    // TODO start game with whatever players (up to 4) are currently in the lobby
+                    Game.start();
+
                     break;
                 case "drawcard":
                     Game.drawCard(username);

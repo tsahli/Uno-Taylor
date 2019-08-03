@@ -2,9 +2,7 @@ package uno;
 
 import org.json.JSONObject;
 
-import java.util.Deque;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -25,12 +23,77 @@ public class Game {
         return joined;
     }
 
-    private Deque<Card> deck = new ConcurrentLinkedDeque<>();
+    private Deque<Card> deck;
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private Deque<Card> discard = new ConcurrentLinkedDeque<>();
+    private static String currentTurn;
 
     private Game() {
+    }
+
+    public static void playCard(Card card, String username) {
+        if (null == game) {
+            throw new IllegalStateException("No game is currently in progress");
+        }
+
+        Player player = game.players.stream()
+                .filter(p -> p.getUsername().equals(username))
+                .findAny()
+                .orElse(null);
+        if (null == player) {
+            throw new IllegalArgumentException("No player with username " + username + " is playing");
+        }
+        if (!Objects.equals(currentTurn, player.getUsername())) {
+            throw new IllegalArgumentException("It is not player " + username + "'s turn");
+        }
+
+        game.discard.add(player.playCard(card));
+
+        JSONObject cardMessage = new JSONObject();
+        cardMessage.put("playedCard", card.toJson());
+
+        broadcast(cardMessage);
+
+        synchronized (game.players) {
+            Player nextTurn = game.players.stream().reduce(null, (turn, player2) -> {
+                if (null != turn && Objects.equals(currentTurn, turn.getUsername())) {
+                    return player2;
+                }
+                if (Objects.equals(currentTurn, player2.getUsername())) {
+                    return player2;
+                }
+
+                return null;
+            });
+
+            if (null == nextTurn || Objects.equals(nextTurn.getUsername(), currentTurn)) {
+                currentTurn = game.players.peek().getUsername();
+            }
+            else {
+                currentTurn = nextTurn.getUsername();
+            }
+        }
+
+        JSONObject turnMessage = new JSONObject();
+        turnMessage.put("turnMessage", "turn");
+        MessageHandler.getInstance().sendToUser(turnMessage, currentTurn);
+    }
+
+    private static void broadcast(JSONObject cardMessage) {
+        game.players.forEach(p -> MessageHandler.getInstance().sendToUser(cardMessage, p.getUsername()));
+    }
+
+    public static void start() {
+        if (null == game || 0 == game.players.size()) {
+            throw new IllegalStateException("Unable to start a game - no players have joined");
+        }
+        if (null != game.deck) {
+            throw new IllegalStateException("Game is already started - not starting again");
+        }
+
         final String[] SPECIAL_TYPES = { "Skip", "Draw Two", "Reverse" };
+
+        List<Card> deck = new ArrayList<>();
 
         deck.add(new Card("0", Card.Color.Blue));
         deck.add(new Card("0", Card.Color.Green));
@@ -57,31 +120,30 @@ public class Game {
             deck.add(new Card("Wild", null));
             deck.add(new Card("Wild Draw Four", null));
         }
-    }
+        Collections.shuffle(deck);
 
-    public static void playCard(Card card, String username) {
-        if (null == game) {
-            throw new IllegalStateException("No game is currently in progress");
-        }
+        game.deck = new ConcurrentLinkedDeque<>();
+        game.deck.addAll(deck);
 
-        Player player = game.players.stream()
-                .filter(p -> p.getUsername().equals(username))
-                .findAny()
-                .orElse(null);
-        if (null == player) {
-            throw new IllegalArgumentException("No player with username " + username + " is playing");
-        }
+        MessageHandler handler = MessageHandler.getInstance();
+        currentTurn = null;
+        game.players.forEach(player -> {
+            while (player.handSize() < 7) {
+                player.drawCard(game.deck.pop());
+            }
 
-        game.discard.add(player.playCard(card));
+            JSONObject message = new JSONObject();
+            message.put("initialHand", player.cardArray());
 
-        JSONObject cardMessage = new JSONObject();
-        cardMessage.put("playedCard", card.toJson());
+            if (currentTurn == null) {
+                currentTurn = player.getUsername();
+            }
+            handler.sendToUser(message, player.getUsername());
+        });
 
-        broadcast(cardMessage);
-    }
-
-    private static void broadcast(JSONObject cardMessage) {
-        game.players.forEach(p -> MessageHandler.getInstance().sendToUser(cardMessage, p.getUsername()));
+        JSONObject turnMessage = new JSONObject();
+        turnMessage.put("turnMessage", "turn");
+        handler.sendToUser(turnMessage, currentTurn);
     }
 
     private void addPlayer(String player) {
@@ -93,14 +155,21 @@ public class Game {
             game = new Game();
         }
 
-        Player player = game.players.stream()
-                .filter(p -> p.getUsername().equals(username))
-                .findAny()
-                .orElse(null);
+        Player player;
+        synchronized (game.players) {
+            player = game.players.stream()
+                    .filter(p -> p.getUsername().equals(username))
+                    .findAny()
+                    .orElse(null);
+        }
+
         if (null == player) {
             throw new IllegalStateException("Username " + username + " is not joined");
         }
 
+        if (null == game.deck) {
+            throw new IllegalStateException("Game is not started");
+        }
         if (game.deck.size() <= 0) {
             throw new IllegalStateException("Deck is empty");
         }
@@ -122,6 +191,11 @@ public class Game {
         boolean playerQuit;
         synchronized(game.players) {
             playerQuit = game.players.removeIf(player -> Objects.equals(username, player.getUsername()));
+        }
+
+        if (0 == game.players.size()) {
+            game = null;
+            return;
         }
 
         if (playerQuit) {
