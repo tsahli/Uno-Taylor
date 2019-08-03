@@ -67,7 +67,7 @@ public class Game {
             });
 
             if (null == nextTurn || Objects.equals(nextTurn.getUsername(), currentTurn)) {
-                currentTurn = game.players.peek().getUsername();
+                currentTurn = Objects.requireNonNull(game.players.peek()).getUsername();
             }
             else {
                 currentTurn = nextTurn.getUsername();

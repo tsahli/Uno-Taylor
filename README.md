@@ -102,7 +102,68 @@ All messages will be wrapped in `{ "type": "application", "message": <message go
 * _APP_ (The format of this message is dependant on the API defined by the group)
 
 ```json
+{
+  "playedCard":
+    {
+      "color": "color",
+      "value": "1",
+      "username": "username"
+    }
+}
+```
 
+```json
+{
+  "drawnCard":
+    {
+      "color": "color",
+      "value": "1",
+      "username": "username"
+    }
+}
+```
+
+```json
+{
+  "initialHand":
+    [
+      {"color": "color", "value": "value"}, 
+      {"color": "color", "value": "value"},
+      {"color": "color", "value": "value"},
+      {"color": "color", "value": "value"}, 
+      {"color": "color", "value": "value"}, 
+      {"color": "color", "value": "value"}, 
+      {"color": "color", "value": "value"}
+    ]
+}
+```
+
+```json
+{
+  "winnerMode": true
+}
+```
+
+```json
+{
+  "turnMessage": "turn"
+}
+```
+
+```json
+{
+  "quit": "quit"
+}
+```
+
+```json
+{
+  "win":
+    {
+      "winMessage": "win",
+      "username": "username"
+    }
+}
 ```
 
 * _WHOIS_
