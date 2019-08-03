@@ -6,8 +6,6 @@ import org.json.JSONObject;
 public class MessageHandler extends Handler {
     private static final String MODULE = "Uno";
 
-    private String username;
-
     public MessageHandler() {
         this(null);
     }
@@ -15,14 +13,19 @@ public class MessageHandler extends Handler {
         super(port);
     }
 
+    public static MessageHandler getInstance() {
+        return handler;
+    }
+
+    private static MessageHandler handler = new MessageHandler();
+
     @Override
     protected void handle(JSONObject message) {
         if (null == message.optString("module") || !MODULE.equals(message.getString("module"))) {
             return;
         }
-        if (null == username) {
-            username = message.getString("username");
-        }
+
+        String username = message.getString("username");
 
         if (!message.has("action")) {
             JSONObject errorMessage = new JSONObject();
@@ -35,12 +38,15 @@ public class MessageHandler extends Handler {
 
         try {
             switch (message.getString("action")) {
-                case "join":
+                case "start":
                     JSONObject ackMessage = new JSONObject();
-                    ackMessage.put("action", Game.joinGame(this) ? "ack" : "deny");
+                    ackMessage.put("action", Game.joinGame(username) ? "ack" : "deny");
 
                     netSend(ackMessage, username, MODULE);
 
+                    break;
+                case "play":
+                    // TODO start game with whatever players (up to 4) are currently in the lobby
                     break;
                 case "drawcard":
                     Game.drawCard(username);
@@ -53,6 +59,13 @@ public class MessageHandler extends Handler {
 
                     Game.playCard(new Card(message.getJSONObject("card")), username);
                     break;
+                case "unocall":
+                    // TODO check for UNO for the player making the call
+                    break;
+                case "quit":
+                    Game.quit(username);
+
+                    break;
                 default:
                     System.out.println(message);
             }
@@ -61,19 +74,16 @@ public class MessageHandler extends Handler {
             errorMessage.put("type", "error");
             errorMessage.put("message", e.getMessage());
 
-            sendToUser(errorMessage);
+            sendToUser(errorMessage, username);
         }
     }
 
     public static void main(String[] args) {
-        new Thread(new MessageHandler()).start();
+        MessageHandler handler = MessageHandler.getInstance();
+        new Thread(handler).start();
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void sendToUser(JSONObject message) {
+    public void sendToUser(JSONObject message, String username) {
         netSend(message, username, MODULE);
     }
 }

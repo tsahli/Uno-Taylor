@@ -7,15 +7,15 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Player {
-    private MessageHandler handler;
+    private final String username;
     private final Deque<Card> hand = new ConcurrentLinkedDeque<>();
 
-    public Player(MessageHandler handler) {
-        this.handler = handler;
+    public Player(String username) {
+        this.username = username;
     }
 
     public String getUsername() {
-        return handler.getUsername();
+        return username;
     }
 
     public Card playCard(Card card) {
@@ -39,10 +39,6 @@ public class Player {
         }
 
         return toPlay;
-    }
-
-    public void sendToUser(JSONObject message) {
-        handler.sendToUser(message);
     }
 
     public JSONObject toJson() {

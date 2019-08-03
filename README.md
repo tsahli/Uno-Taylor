@@ -11,10 +11,6 @@ Then, from an IDE or `.jar` file, start this server module listening on the same
 (`Uno.jar`). Alternately, you can upload the `.jar` file to the server and run it
 using _**TODO**_
 
-### Writing server code
-
-* _**TODO**_
-
 ### The following message types are handled by the server:
 
 * _LOGIN_
@@ -48,14 +44,56 @@ using _**TODO**_
 
 * _APP_
 
+First message sent to the server must be a "start" message. When all desired players have joined, sending a "play"
+message will cause the server to start the game. Drawing a card, performing a draw 2/4 action, or playing a card end
+a turn. Currently, calling UNO is only supported for the player with UNO.
+
+All messages will be wrapped in `{ "type": "application", "message": <message goes here> }`.
+
 ```json
 {
-  "type": "application",
-  "message": 
+  "module": "UNO",
+  "action": "drawcard"
+}
+```
+
+```json
+{
+  "module": "uno",
+  "action": "send",
+  "card":
     {
-      "module": "Uno",
-      <other data as defined by the API>
+      "color": "red",
+      "value": "1"
     }
+}
+```
+
+```json
+{
+  "module": "uno",
+  "action": "start"
+}
+```
+
+```json
+{
+  "module": "uno",
+  "action": "play"
+}
+```
+
+```json
+{
+  "module": "uno",
+  "action": "unocall"
+}
+```
+
+```json
+{
+  "module": "uno",
+  "action": "quit"
 }
 ```
 

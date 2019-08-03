@@ -3,6 +3,7 @@ package uno;
 import org.json.JSONObject;
 
 import java.util.Deque;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -10,14 +11,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Game {
     private static Game game;
 
-    public static boolean joinGame(MessageHandler player) {
+    public static boolean joinGame(String username) {
         if (null == game) {
             game = new Game();
         }
 
         boolean joined = false;
-        if (game.players.stream().noneMatch(p -> p.getUsername().equals(player.getUsername()))) {
-            game.addPlayer(player);
+        if (game.players.stream().noneMatch(p -> p.getUsername().equals(username))) {
+            game.addPlayer(username);
             joined = true;
         }
 
@@ -25,7 +26,7 @@ public class Game {
     }
 
     private Deque<Card> deck = new ConcurrentLinkedDeque<>();
-    private Queue<Player> players = new ConcurrentLinkedQueue<>();
+    private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private Deque<Card> discard = new ConcurrentLinkedDeque<>();
 
     private Game() {
@@ -76,10 +77,14 @@ public class Game {
         JSONObject cardMessage = new JSONObject();
         cardMessage.put("playedCard", card.toJson());
 
-        game.players.forEach(p -> p.sendToUser(cardMessage));
+        broadcast(cardMessage);
     }
 
-    private void addPlayer(MessageHandler player) {
+    private static void broadcast(JSONObject cardMessage) {
+        game.players.forEach(p -> MessageHandler.getInstance().sendToUser(cardMessage, p.getUsername()));
+    }
+
+    private void addPlayer(String player) {
         players.add(new Player(player));
     }
 
@@ -106,6 +111,28 @@ public class Game {
         JSONObject cardMessage = new JSONObject();
         cardMessage.put("drawnCard", card.toJson());
 
-        player.sendToUser(cardMessage);
+        MessageHandler.getInstance().sendToUser(cardMessage, player.getUsername());
+    }
+
+    public static synchronized void quit(String username) {
+        if (null == game) {
+            return;
+        }
+
+        boolean playerQuit;
+        synchronized(game.players) {
+            playerQuit = game.players.removeIf(player -> Objects.equals(username, player.getUsername()));
+        }
+
+        if (playerQuit) {
+            JSONObject message = new JSONObject();
+            message.put("action", "quit");
+            message.put("username", username);
+
+            broadcast(message);
+        }
+        else {
+            throw new IllegalArgumentException("User " + username + " isn't in the game");
+        }
     }
 }
