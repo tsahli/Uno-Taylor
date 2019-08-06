@@ -143,6 +143,25 @@ public class Game {
         handler.sendToUser(turnMessage, game.currentTurn);
     }
 
+    public static void callUno(String username) {
+        if (null == game) {
+            throw new IllegalStateException("No game started for UNO to be called");
+        }
+
+        Player player = game.players.stream().filter(p -> Objects.equals(username, p.getUsername())).findFirst().orElse(null);
+        if (null == player) {
+            throw new IllegalArgumentException("No player " + username + " to check for UNO");
+        }
+
+        if (1 != player.handSize()) {
+            throw new IllegalArgumentException(username + " does not have UNO");
+        }
+
+        JSONObject winMessage = new JSONObject();
+        winMessage.put("winnerMode", true);
+        MessageHandler.getInstance().sendToUser(winMessage, username);
+    }
+
     private void addPlayer(String player) {
         players.add(new Player(player));
     }

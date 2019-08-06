@@ -61,7 +61,8 @@ public class MessageHandler extends Handler {
                     Game.playCard(new Card(message.getJSONObject("card")), username);
                     break;
                 case "unocall":
-                    // TODO check for UNO for the player making the call
+                    Game.callUno(username);
+
                     break;
                 case "quit":
                     Game.quit(username);
