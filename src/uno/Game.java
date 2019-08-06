@@ -31,6 +31,7 @@ public class Game {
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private Deque<Card> discard = new ConcurrentLinkedDeque<>();
     private String currentTurn;
+    private Card.Color currentColor;
 
     private Game() {
     }
@@ -51,7 +52,13 @@ public class Game {
             throw new IllegalArgumentException("It is not player " + username + "'s turn");
         }
 
+        if (null != card.getColor() && !Objects.equals(game.currentColor, card.getColor()) && !Objects.equals(game.discard.peekLast().getValue(), card.getValue())) {
+            // This card is not a wild and doesn't match the color
+            throw new IllegalArgumentException("Card color (" + game.currentColor + ") or value (" + game.discard.peekLast().getValue() + ") must match, or the card must be a wild card");
+        }
+
         game.discard.add(player.playCard(card));
+        game.currentColor = card.getColor();
 
         JSONObject cardMessage = new JSONObject();
         cardMessage.put("playedCard", card.toJson());
@@ -88,7 +95,7 @@ public class Game {
             throw new IllegalStateException("Game is already started - not starting again");
         }
 
-        final String[] SPECIAL_TYPES = { "Skip", "Draw Two", "Reverse" };
+        final String[] SPECIAL_TYPES = { "skip", "draw2", "reverse" };
 
         List<Card> deck = new ArrayList<>();
 
@@ -113,14 +120,28 @@ public class Game {
             }
         }
 
+        deck.add(new Card("0", Card.Color.Blue));
+        deck.add(new Card("0", Card.Color.Green));
+        deck.add(new Card("0", Card.Color.Red));
+        deck.add(new Card("0", Card.Color.Yellow));
+
         for (int i = 0; i < 4; i++) {
-            deck.add(new Card("Wild", null));
-            deck.add(new Card("Wild Draw Four", null));
+            deck.add(new Card("wild", null));
+            deck.add(new Card("wild4", null));
         }
         Collections.shuffle(deck);
 
         game.deck = new ConcurrentLinkedDeque<>();
         game.deck.addAll(deck);
+
+        Card topCard;
+        do {
+            game.discard.add(game.deck.removeLast());
+
+            topCard = game.discard.peekLast();
+        } while (null == topCard.getColor() || Objects.equals("skip", topCard.getValue()) || Objects.equals("draw2", topCard.getValue()));
+
+        game.currentColor = topCard.getColor();
 
         MessageHandler handler = MessageHandler.getInstance();
         game.currentTurn = null;
