@@ -6,6 +6,7 @@ import events.*;
 import state.ClientState;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,13 +14,17 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ClientGUI extends JFrame {
-    private static JTextArea textArea = new JTextArea();
+    private static JTextArea textArea = new JTextArea(32, 64);
 
     public ClientGUI() {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
+        textArea.setMargin(new Insets(2, 2, 2, 2));
         Container container = getContentPane();
         container.add(textArea, BorderLayout.CENTER);
+        container.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         setTitle("UNO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
@@ -27,7 +32,7 @@ public class ClientGUI extends JFrame {
     }
 
     public static void addText(String text) {
-        textArea.append(text);
+        textArea.append(text + "\n");
     }
 
 
@@ -42,6 +47,7 @@ public class ClientGUI extends JFrame {
         frame = new ClientGUI();
         boolean clientRunning = true;
         while (clientRunning) {
+            addText("Waiting for all connections...");
             Socket socket = new Socket(hostname, port);
 
             gameState = new ClientState();
@@ -62,8 +68,7 @@ public class ClientGUI extends JFrame {
                     addText(gameState.hand.printHand());
 
                     do {
-                        //addText("Enter number to play card, 'p' to draw");
-                        String response = JOptionPane.showInputDialog("\"Enter number to play card, 'p' to draw: \"");
+                        String response = JOptionPane.showInputDialog("Enter number to play card, 'p' to draw: ");
                         if (response.toLowerCase().equals("p")) {
                             outToServer.writeObject(new DrawCard());
                             validInput = true;
