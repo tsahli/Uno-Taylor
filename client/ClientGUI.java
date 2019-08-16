@@ -43,8 +43,7 @@ public class ClientGUI extends JFrame {
         String username = JOptionPane.showInputDialog("Enter your username: ");
         int port = 9886;
 
-        ClientGUI frame;
-        frame = new ClientGUI();
+        ClientGUI frame = new ClientGUI();
         boolean clientRunning = true;
         while (clientRunning) {
             addText("Waiting for all connections...");
@@ -66,6 +65,24 @@ public class ClientGUI extends JFrame {
                     addText("Top card is: " + gameState.topCard.makeString());
                     addText("Your hand:");
                     addText(gameState.hand.printHand());
+
+                    JFrame cardFrame;
+                    cardFrame = new JFrame();
+                    cardFrame.setLayout(new FlowLayout(FlowLayout.CENTER));
+                    cardFrame.setLocation(500, 600);
+                    cardFrame.setSize(700, 600);
+                    cardFrame.setTitle("Cards in Hand");
+                    cardFrame.setVisible(true);
+
+                    String[] userCards = gameState.hand.printHand().split("\n");
+                    for (int i = 0; i < userCards.length; i++) {
+                        String imageName = userCards[i].substring(3).replaceAll("\\s", "");
+                        JLabel labelImage = new JLabel("");
+                        labelImage.setIcon(new ImageIcon(ClientGUI.class.getResource("/images/" + imageName + ".png")));
+                        cardFrame.add(labelImage);
+                    }
+                    cardFrame.pack();
+                    cardFrame.validate();
 
                     do {
                         String response = JOptionPane.showInputDialog("Enter number to play card, 'p' to draw: ");
