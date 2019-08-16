@@ -69,14 +69,14 @@ public class ClientGUI extends JFrame {
                     JFrame cardFrame;
                     cardFrame = new JFrame();
                     cardFrame.setLayout(new FlowLayout(FlowLayout.CENTER));
-                    cardFrame.setLocation(500, 600);
+                    cardFrame.setLocation(400, 600);
                     cardFrame.setSize(700, 600);
                     cardFrame.setTitle("Cards in Hand");
                     cardFrame.setVisible(true);
 
                     String[] userCards = gameState.hand.printHand().split("\n");
-                    for (int i = 0; i < userCards.length; i++) {
-                        String imageName = userCards[i].substring(3).replaceAll("\\s", "");
+                    for (String userCard : userCards) {
+                        String imageName = userCard.substring(3).replaceAll("\\s", "");
                         JLabel labelImage = new JLabel("");
                         labelImage.setIcon(new ImageIcon(ClientGUI.class.getResource("/images/" + imageName + ".png")));
                         cardFrame.add(labelImage);
