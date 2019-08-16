@@ -101,22 +101,14 @@ public class ClientGUI extends JFrame {
                                     if (card.canSetColor()) {
                                         boolean validColorInput = false;
                                         do {
-                                            try {
-                                                addText("Select a new color, by number: ");
-                                                int color = 1;
-                                                for (Color col : allColors) {
-                                                    addText(color + ": " + col.name);
-                                                    color++;
-                                                }
-                                                String colorChoice = JOptionPane.showInputDialog("Choose a color: ");
-                                                int colorChoiceNumber = Integer.valueOf(colorChoice).intValue();
-                                                if (colorChoiceNumber > 0 && colorChoiceNumber < 5) {
-                                                    card.color = allColors[colorChoiceNumber - 1];
-                                                    validColorInput = true;
-                                                } else {
-                                                    validColorInput = false;
-                                                }
-                                            } catch (NumberFormatException e) {
+                                            String[] choices = {"1. Blue", "2. Green", "3. Red", "4. Yellow"};
+                                            String input = (String) JOptionPane.showInputDialog(null, "Choose a new color: ", "Color Picker", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+                                            String colorNumber = input.replaceAll("[^0-9]", "");
+                                            int colorInt = Integer.parseInt(colorNumber);
+                                            if (colorInt > 0 && colorInt < 5) {
+                                                card.color = allColors[colorInt - 1];
+                                                validColorInput = true;
+                                            } else {
                                                 validColorInput = false;
                                             }
                                         } while (!validColorInput);
