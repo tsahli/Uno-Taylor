@@ -8,6 +8,7 @@ import state.ClientState;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -122,6 +123,7 @@ public class ClientGUI extends JFrame {
                                     }
                                     outToServer.writeObject(new PlaceCard(card));
                                     validInput = true;
+                                    cardFrame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
                                 }
                             } catch (NumberFormatException e) {
                                 validInput = false;
